@@ -1,8 +1,6 @@
 module github.com/ory/hydra/v2
 
-go 1.22
-
-toolchain go1.22.5
+go 1.23
 
 replace github.com/ory/hydra-client-go/v2 => ./internal/httpclient
 

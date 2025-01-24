@@ -47,8 +47,8 @@ github.com/bmizerany/assert v0.0.0-20160611221934-b7ed37b82869/go.mod h1:Ekp36dR
 github.com/bradleyjkemp/cupaloy/v2 v2.8.0 h1:any4BmKE+jGIaMpnU8YgH/I2LPiLBufr6oMMlVBbn9M=
 github.com/bradleyjkemp/cupaloy/v2 v2.8.0/go.mod h1:bm7JXdkRd4BHJk9HpwqAI8BoAY1lps46Enkdqw6aRX0=
 github.com/bwesterb/go-ristretto v1.2.3/go.mod h1:fUIoIZaG73pV5biE2Blr2xEzDoMj7NFEuV9ekS419A0=
-github.com/canonical/fosite v0.0.0-20250107160009-349723bd69aa h1:wFaxSerIMX5A/zV/oIdMpXtf9+sT6t+llHIjhMl5BWI=
-github.com/canonical/fosite v0.0.0-20250107160009-349723bd69aa/go.mod h1:rwKPYm0bLjxRQ+J7/CVAIwpnwRMaRrwRzdGqgbjwNK8=
+github.com/canonical/fosite v0.0.0-20250124155649-b77efc392574 h1:ZH9mv26aX0FTVXM6jenoVZfsBBxKxnjiq8c44sMMAUE=
+github.com/canonical/fosite v0.0.0-20250124155649-b77efc392574/go.mod h1:rwKPYm0bLjxRQ+J7/CVAIwpnwRMaRrwRzdGqgbjwNK8=
 github.com/cenkalti/backoff/v3 v3.2.2 h1:cfUAAO3yvKMYKPrvhDuHSwQnhZNk/RMHKdZqKTxfm6M=
 github.com/cenkalti/backoff/v3 v3.2.2/go.mod h1:cIeZDE3IrqwwJl6VUwCN6trj1oXrTS4rc0ij+ULvLYs=
 github.com/cenkalti/backoff/v4 v4.3.0 h1:MyRJ/UdXutAwSAT+s3wNd7MfTIcy71VQueUuFK343L8=

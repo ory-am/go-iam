@@ -4,7 +4,6 @@
 package consent
 
 import (
-	"context"
 	"encoding/json"
 	"net/http"
 	"net/url"
@@ -479,7 +478,7 @@ func (h *Handler) acceptOAuth2LoginRequest(w http.ResponseWriter, r *http.Reques
 	}
 	handledLoginRequest.RequestedAt = loginRequest.RequestedAt
 
-	f, err := h.decodeFlowWithClient(ctx, challenge, flowctx.AsLoginChallenge)
+	f, err := flowctx.Decode[flow.Flow](ctx, h.r.FlowCipher(), challenge, flowctx.AsLoginChallenge)
 	if err != nil {
 		h.r.Writer().WriteError(w, r, err)
 		return
@@ -579,11 +578,12 @@ func (h *Handler) rejectOAuth2LoginRequest(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	f, err := h.decodeFlowWithClient(ctx, challenge, flowctx.AsLoginChallenge)
+	f, err := flowctx.Decode[flow.Flow](ctx, h.r.FlowCipher(), challenge, flowctx.AsLoginChallenge)
 	if err != nil {
 		h.r.Writer().WriteError(w, r, err)
 		return
 	}
+
 	request, err := h.r.ConsentManager().HandleLoginRequest(ctx, f, challenge, &flow.HandledLoginRequest{
 		Error:       &p,
 		ID:          challenge,
@@ -765,11 +765,12 @@ func (h *Handler) acceptOAuth2ConsentRequest(w http.ResponseWriter, r *http.Requ
 	p.RequestedAt = cr.RequestedAt
 	p.HandledAt = sqlxx.NullTime(time.Now().UTC())
 
-	f, err := h.decodeFlowWithClient(ctx, challenge, flowctx.AsConsentChallenge)
+	f, err := flowctx.Decode[flow.Flow](ctx, h.r.FlowCipher(), challenge, flowctx.AsConsentChallenge)
 	if err != nil {
 		h.r.Writer().WriteError(w, r, err)
 		return
 	}
+
 	hr, err := h.r.ConsentManager().HandleConsentRequest(ctx, f, &p)
 	if err != nil {
 		h.r.Writer().WriteError(w, r, errorsx.WithStack(err))
@@ -872,7 +873,7 @@ func (h *Handler) rejectOAuth2ConsentRequest(w http.ResponseWriter, r *http.Requ
 		return
 	}
 
-	f, err := h.decodeFlowWithClient(ctx, challenge, flowctx.AsConsentChallenge)
+	f, err := flowctx.Decode[flow.Flow](ctx, h.r.FlowCipher(), challenge, flowctx.AsConsentChallenge)
 	if err != nil {
 		h.r.Writer().WriteError(w, r, err)
 		return
@@ -1047,13 +1048,4 @@ func (h *Handler) getOAuth2LogoutRequest(w http.ResponseWriter, r *http.Request,
 	}
 
 	h.r.Writer().Write(w, r, request)
-}
-
-func (h *Handler) decodeFlowWithClient(ctx context.Context, challenge string, opts ...flowctx.CodecOption) (*flow.Flow, error) {
-	f, err := flowctx.Decode[flow.Flow](ctx, h.r.FlowCipher(), challenge, opts...)
-	if err != nil {
-		return nil, err
-	}
-
-	return f, nil
 }

@@ -89,6 +89,13 @@ type revokeOAuth2ConsentSessions struct {
 	// in: query
 	Client string `json:"client"`
 
+	// Consent Challenge ID
+	//
+	// If set, revoke all token chains derived from this particular consent request ID.
+	//
+	// in: query
+	ConsentChallengeID string `json:"consent_challenge_id"`
+
 	// Revoke All Consent Sessions
 	//
 	// If set to `true` deletes all consent sessions by the Subject that have been granted.
@@ -119,8 +126,13 @@ func (h *Handler) revokeOAuth2ConsentSessions(w http.ResponseWriter, r *http.Req
 	subject := r.URL.Query().Get("subject")
 	client := r.URL.Query().Get("client")
 	allClients := r.URL.Query().Get("all") == "true"
+	consentChallengeID := r.URL.Query().Get("consent_challenge_id")
 	if subject == "" {
 		h.r.Writer().WriteError(w, r, errorsx.WithStack(fosite.ErrInvalidRequest.WithHint(`Query parameter 'subject' is not defined but should have been.`)))
+		return
+	}
+	if consentChallengeID != "" && client != "" {
+		h.r.Writer().WriteError(w, r, errorsx.WithStack(fosite.ErrInvalidRequest.WithHint(`Query parameter 'client' and 'consent_challenge_id' cannot be set at the same time.`)))
 		return
 	}
 
@@ -137,6 +149,12 @@ func (h *Handler) revokeOAuth2ConsentSessions(w http.ResponseWriter, r *http.Req
 			return
 		}
 		events.Trace(r.Context(), events.ConsentRevoked, events.WithSubject(subject))
+	case consentChallengeID != "":
+		if err := h.r.ConsentManager().RevokeSubjectConsentSessionByID(r.Context(), subject, consentChallengeID); err != nil && !errors.Is(err, x.ErrNotFound) {
+			h.r.Writer().WriteError(w, r, err)
+			return
+		}
+		return
 	default:
 		h.r.Writer().WriteError(w, r, errorsx.WithStack(fosite.ErrInvalidRequest.WithHint(`Query parameter both 'client' and 'all' is not defined but one of them should have been.`)))
 		return

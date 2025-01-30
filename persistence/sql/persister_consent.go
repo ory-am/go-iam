@@ -44,12 +44,12 @@ func (p *Persister) RevokeSubjectClientConsentSession(ctx context.Context, user,
 	return p.Transaction(ctx, p.revokeConsentSession("consent_challenge_id IS NOT NULL AND subject = ? AND client_id = ?", user, client))
 }
 
-func (p *Persister) RevokeSubjectConsentSessionByID(ctx context.Context, user, consentChallengeID string) (err error) {
-	ctx, span := p.r.Tracer(ctx).Tracer().Start(ctx, "persistence.sql.RevokeSubjectConsentSessionByID",
+func (p *Persister) RevokeConsentSessionByID(ctx context.Context, consentChallengeID string) (err error) {
+	ctx, span := p.r.Tracer(ctx).Tracer().Start(ctx, "persistence.sql.RevokeConsentSessionByID",
 		trace.WithAttributes(attribute.String("consent_challenge_id", consentChallengeID)))
 	defer otelx.End(span, &err)
 
-	return p.Transaction(ctx, p.revokeConsentSession("consent_challenge_id = ? AND subject = ? ", consentChallengeID, user))
+	return p.Transaction(ctx, p.revokeConsentSession("consent_challenge_id = ?", consentChallengeID))
 }
 
 func (p *Persister) revokeConsentSession(whereStmt string, whereArgs ...interface{}) func(context.Context, *pop.Connection) error {

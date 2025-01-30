@@ -125,10 +125,14 @@ type revokeOAuth2ConsentSessions struct {
 func (h *Handler) revokeOAuth2ConsentSessions(w http.ResponseWriter, r *http.Request, _ httprouter.Params) {
 	subject := r.URL.Query().Get("subject")
 	client := r.URL.Query().Get("client")
-	allClients := r.URL.Query().Get("all") == "true"
 	consentChallengeID := r.URL.Query().Get("consent_challenge_id")
-	if subject == "" {
-		h.r.Writer().WriteError(w, r, errorsx.WithStack(fosite.ErrInvalidRequest.WithHint(`Query parameter 'subject' is not defined but should have been.`)))
+	allClients := r.URL.Query().Get("all") == "true"
+	if subject == "" && consentChallengeID == "" {
+		h.r.Writer().WriteError(w, r, errorsx.WithStack(fosite.ErrInvalidRequest.WithHint(`Query parameter 'subject' or 'consent_challenge_id' are required.`)))
+		return
+	}
+	if consentChallengeID != "" && subject != "" {
+		h.r.Writer().WriteError(w, r, errorsx.WithStack(fosite.ErrInvalidRequest.WithHint(`Query parameter 'subject' and 'consent_challenge_id' cannot be set at the same time.`)))
 		return
 	}
 	if consentChallengeID != "" && client != "" {
@@ -137,7 +141,7 @@ func (h *Handler) revokeOAuth2ConsentSessions(w http.ResponseWriter, r *http.Req
 	}
 
 	switch {
-	case len(client) > 0:
+	case client != "":
 		if err := h.r.ConsentManager().RevokeSubjectClientConsentSession(r.Context(), subject, client); err != nil && !errors.Is(err, x.ErrNotFound) {
 			h.r.Writer().WriteError(w, r, err)
 			return
@@ -150,7 +154,7 @@ func (h *Handler) revokeOAuth2ConsentSessions(w http.ResponseWriter, r *http.Req
 		}
 		events.Trace(r.Context(), events.ConsentRevoked, events.WithSubject(subject))
 	case consentChallengeID != "":
-		if err := h.r.ConsentManager().RevokeSubjectConsentSessionByID(r.Context(), subject, consentChallengeID); err != nil && !errors.Is(err, x.ErrNotFound) {
+		if err := h.r.ConsentManager().RevokeConsentSessionByID(r.Context(), consentChallengeID); err != nil && !errors.Is(err, x.ErrNotFound) {
 			h.r.Writer().WriteError(w, r, err)
 			return
 		}

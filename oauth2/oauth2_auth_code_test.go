@@ -1215,7 +1215,6 @@ func TestAuthCodeWithDefaultStrategy(t *testing.T) {
 
 				_, err = adminClient.OAuth2API.
 					RevokeOAuth2ConsentSessions(context.Background()).
-					Subject(subject).
 					ConsentChallengeId(consentRequestID).
 					Execute()
 				require.NoError(t, err)

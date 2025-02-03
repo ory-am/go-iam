@@ -37,6 +37,9 @@ jobs:
     outputs:
       sdk-cache-key: ${{ steps.sdk-generate.outputs.sdk-cache-key }}
     steps:
+      - uses: actions/setup-go@v4
+        with:
+          go-version: "1.23"
       - uses: ory/ci/sdk/generate@master
         with:
           token: ${{ secrets.ORY_BOT_PAT }}

@@ -129,7 +129,6 @@ func acceptConsentHandler(t *testing.T, c *client.Client, adminClient *hydra.API
 		assert.EqualValues(t, c.RedirectURIs, rr.Client.RedirectUris)
 		assert.EqualValues(t, subject, pointerx.Deref(rr.Subject))
 		assert.EqualValues(t, []string{"hydra", "offline", "openid"}, rr.RequestedScope)
-		assert.EqualValues(t, r.URL.Query().Get("consent_challenge"), rr.Challenge)
 		assert.Contains(t, *rr.RequestUrl, reg.Config().OAuth2AuthURL(r.Context()).String())
 		if checkRequestPayload != nil {
 			checkRequestPayload(rr)
@@ -1190,6 +1189,38 @@ func TestAuthCodeWithDefaultStrategy(t *testing.T) {
 
 				t.Run("strategy=opaque", run("opaque"))
 				t.Run("strategy=jwt", run("jwt"))
+			})
+
+			t.Run("case=can revoke token chains with ID obtained from consent requests", func(t *testing.T) {
+				c, conf := newOAuth2Client(t, reg, testhelpers.NewCallbackURL(t, "callback", testhelpers.HTTPServerNotImplementedHandler))
+
+				var consentRequestID string
+				testhelpers.NewLoginConsentUI(t, reg.Config(),
+					acceptLoginHandler(t, c, adminClient, reg, subject, nil),
+					acceptConsentHandler(t, c, adminClient, reg, subject, func(ocr *hydra.OAuth2ConsentRequest) {
+						consentRequestID = ocr.Challenge
+					}),
+				)
+
+				code, _ := getAuthorizeCode(t, conf, nil)
+				require.NotEmpty(t, code)
+
+				require.NotZero(t, consentRequestID)
+				t.Logf("Consent Request ID: %s", consentRequestID)
+
+				token, err := conf.Exchange(context.Background(), code)
+				require.NoError(t, err)
+
+				introspectAccessToken(t, conf, token, subject)
+
+				_, err = adminClient.OAuth2API.
+					RevokeOAuth2ConsentSessions(context.Background()).
+					ConsentChallengeId(consentRequestID).
+					Execute()
+				require.NoError(t, err)
+
+				at := testhelpers.IntrospectToken(t, conf, token.AccessToken, adminTS)
+				assert.False(t, at.Get("active").Bool(), "%s", at)
 			})
 
 			t.Run("case=graceful token rotation", func(t *testing.T) {

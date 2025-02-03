@@ -2951,11 +2951,10 @@ func (a *OAuth2APIService) RevokeOAuth2ConsentSessionsExecute(r ApiRevokeOAuth2C
 	localVarHeaderParams := make(map[string]string)
 	localVarQueryParams := url.Values{}
 	localVarFormParams := url.Values{}
-	if r.subject == nil {
-		return nil, reportError("subject is required and must be specified")
-	}
 
-	parameterAddToHeaderOrQuery(localVarQueryParams, "subject", r.subject, "")
+	if r.subject != nil {
+		parameterAddToHeaderOrQuery(localVarQueryParams, "subject", r.subject, "")
+	}
 	if r.client != nil {
 		parameterAddToHeaderOrQuery(localVarQueryParams, "client", r.client, "")
 	}

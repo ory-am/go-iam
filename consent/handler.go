@@ -79,7 +79,6 @@ type revokeOAuth2ConsentSessions struct {
 	// The subject whose consent sessions should be deleted.
 	//
 	// in: query
-	// required: true
 	Subject string `json:"subject"`
 
 	// OAuth 2.0 Client ID

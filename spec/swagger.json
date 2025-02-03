@@ -1249,8 +1249,7 @@
             "type": "string",
             "description": "OAuth 2.0 Consent Subject\n\nThe subject whose consent sessions should be deleted.",
             "name": "subject",
-            "in": "query",
-            "required": true
+            "in": "query"
           },
           {
             "type": "string",

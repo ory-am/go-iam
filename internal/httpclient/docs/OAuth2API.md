@@ -1551,7 +1551,7 @@ import (
 )
 
 func main() {
-	subject := "subject_example" // string | OAuth 2.0 Consent Subject  The subject whose consent sessions should be deleted.
+	subject := "subject_example" // string | OAuth 2.0 Consent Subject  The subject whose consent sessions should be deleted. (optional)
 	client := "client_example" // string | OAuth 2.0 Client ID  If set, deletes only those consent sessions that have been granted to the specified OAuth 2.0 Client ID. (optional)
 	consentChallengeId := "consentChallengeId_example" // string | Consent Challenge ID  If set, revoke all token chains derived from this particular consent request ID. (optional)
 	all := true // bool | Revoke All Consent Sessions  If set to `true` deletes all consent sessions by the Subject that have been granted. (optional)
